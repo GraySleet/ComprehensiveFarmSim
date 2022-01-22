@@ -1,5 +1,7 @@
 package FarmSim;
 
+import com.sun.source.tree.AnnotatedTypeTree;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -10,7 +12,6 @@ import static java.lang.Integer.parseInt;
 public class Framer {
     private JPanel MainPanel;
     private JTextArea infoText;
-
     private JTextArea helpText;
     private JTextField DataField;
     private JPanel Panel1;
@@ -21,6 +22,7 @@ public class Framer {
     private JList<String> myList;
     private JButton RunButton;
     private JTextArea requestText;
+    private JButton closeButton;
 
     private myCrop thisCrop;
     private String currDataCode;
@@ -29,29 +31,37 @@ public class Framer {
     private boolean acceptingButton = true;//if we accept the button or not
     private boolean acceptingList = true;//if we accept the list or not
 
-    private boolean farmTrue = false;
-    private boolean buyTrue = false;
-    private boolean exploringTrue = false;
-    private boolean fishTrue = false;
-    private boolean craftTrue = false;
-    private boolean craftExploringTrue = false;
+    private boolean farmTrue = false;//Farming, yes or no
+    private boolean buyTrue = false;//Buying, yes or no
+    private boolean exploringTrue = false;//Exploring, yes or no
+    private boolean fishTrue = false;//Fishing, yes or no
+    private boolean craftTrue = false;//Crafting, yes or no
+    private boolean craftExploringTrue = false;//Craft after exploring, yes or no
+    private boolean clickerTrue = false;
 
+    private long timeLeft = 0;//How much time we have left until the next farming cycle starts.
+    private long runningTimer;//Time each of the methods takes up.
+    //Probably will take a tiny bit of millseconds more. So, I'll actually add 1 second to every process and 10 ms to Exploring.
+    //we will have lots of nested whiles. its ok, because we aren't trying to search for something.
 
+    private String whattoCraft; //The string of what we craft , we will make a default class.
 
-    private boolean cancelConcat = false;
-
-    private String whattoCraft;
-
-    private int fishingArea = 0;
-    private int fishCount = 0;
-    private int minnowCount = 0;
-    private int gummyCount = 0;
+    private int fishingArea = 0;//Which fishing area we choose
+    private int fishCount = 0; //how much fish we want to fish
+    private int minnowCount = 0;//How many minnows we have
+    private int gummyCount = 0;//How many gummies we have
     //dont need wormcount, can just buy at the beginning...
-    private int currSeeds = 0;
-    private double stamConsumptionCount = 0;
-    DefaultListModel<String> data;
 
+    private int currSeeds = 0; //How many seeds we have (when we hit 0, we have to start buying!)
 
+    private double stamConsumptionCount = 0;//how much stamina we are allowed to consume
+
+    DefaultListModel<String> data;//holds the list for our data
+    private boolean cancelConcat = false;//If we cancel concatenation on our switch statement
+
+    private boolean infiniteRun = true;
+
+    //TODO: Special class for mushrooms.
     public void makeKey() {
         DataField.addKeyListener(new KeyAdapter() {
             @Override
@@ -299,9 +309,12 @@ public class Framer {
             case"41y":
                 craftTrue = true;
                 infoText.append("\nCrafting Activated");
-                requestText.append("\nWhat things do you want to craft?");//TODO: abcdef, choose what to craft
-                cancelConcat = true;
-                currDataCode = "42";
+                requestText.append("You will craft every hour, be sure to change the items when you dont want them anymore.");
+                infoText.append("Current items crafting: Iron Cup, Twine, Rope, Yarn, Wood Plank, Sturdy Shield");
+                requestText.append("\nCrafting Configuration Complete");
+                acceptingList = true;
+                acceptingButton = true;
+                cancelConcat = false;
                 break;
             case"41":
                 craftTrue = false;
@@ -309,25 +322,14 @@ public class Framer {
                 acceptingList = true;
                 acceptingButton = true;
                 break;
-            case"42":
-                infoText.append("\nYour crafting items are:" + response);
-                requestText.append("You will craft every hour.");
-                requestText.append("\nCrafting Configuration Complete");
-                acceptingList = true;
-                acceptingButton = true;
-                cancelConcat = false;
-                break;
             case"51"://QuickClicker... TODO
                 break;
             case"61y"://This will be the run questions.
-                infoText.append("\nRunning in 10 seconds.");
-                try{
-                    Thread.sleep(10000);
+                infoText.append("\n Run has been accepted.");
+                if(farmTrue){
+                    requestText.append("\nSince you've selected farming. How much time do you have left on your crop?");
                 }
-                catch(InterruptedException e){
-                    e.printStackTrace();
-                }
-                runStart();//Here we go, we are going to start the method
+                cancelConcat = true;
                 break;
             case"61n"://This will be the run questions.
                 infoText.append("\nRun Cancelled");
@@ -335,6 +337,25 @@ public class Framer {
                 acceptingButton = true;
                 cancelConcat = false;
                 break;
+            case "62":
+                if(farmTrue) {
+                    timeLeft = Long.parseLong(response);
+                    infoText.append("\nYou have" + response + "milliseconds left on your crop.");
+                }
+                infoText.append("\nRunning in 10 seconds.");
+                try{
+                    Thread.sleep(10000);
+                }
+                catch(InterruptedException e){
+                    e.printStackTrace();
+                }
+                try {
+                    runStart();
+                }
+                catch(AWTException e){
+                    e.printStackTrace();
+                }//Here we go, we are going to start the method
+                cancelConcat = false;
             default:
                 requestText.append("\nError, something happened. If you have a confirmation message, keep going");
                 acceptingList = true;
@@ -398,15 +419,229 @@ public class Framer {
         });
 
 
+        closeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
     }//end constructor]
 
-    public void runStart() {
+    public void farming() throws AWTException{//This will include: Going (from Home) to the Farm, then clicking back to Home.//TODO
+
+        Robot myRobot = new Robot();
+        double myRandom;
+        int myX;
+        int myY;
+
+        //Click Home
+
+        //Click My Farm
+
+        //Harvest All Crops. (259,205) --> (876,237)
+        myRandom = Math.random();
+        myX = (int) (259 + (876 - 259) * myRandom);
+        myY = (int) (205 + (237 - 205) * myRandom);
+        myRobot.mouseMove(myX, myY);
+        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        timeLeft -=  ((int) (1000 + 1000 * myRandom));
+        myRobot.delay((int) (1000 + 1000 * myRandom));
+
+
+        //Click Plant All Selected. (889,205 --> 1512, 237)
+        myRandom = Math.random();
+        myX = (int) (889 + (1512 - 889) * myRandom);
+        myY = (int) (205 + (237 - 205) * myRandom);
+        myRobot.mouseMove(myX, myY);
+        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        timeLeft -=  ((int) (1000 + 1000 * myRandom));
+        myRobot.delay((int) (1000 + 1000 * myRandom));
+
+        //Click "yes". (732,944 --> 1184, 972)
+        myX = (int) (732 + (1184 - 732) * myRandom);
+        myY = (int) (944 + (972 - 944) * myRandom);
+        myRobot.mouseMove(myX, myY);
+        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        myRandom = Math.random();
+        timeLeft -=  ((int) (1000 + 1000 * myRandom));
+        myRobot.delay((int) (1000 + 1000 * myRandom));
+
+
+    }
+
+    public void mushroomCrafting() throws AWTException{//TODO
+        //We want to craft mushrooms, so
+
+        //click Home
+        //click My Workshop
+        //Scroll 10 times to Mushrooms
+        //Click Craft on mushroom button
+
+
+    }
+
+    public void exploringCrafting() throws AWTException{
+        //click Home
+        //click My Workshop
+        //click Fancy Drum
+        //click Garnet
+        //scroll down 1
+        //click Garnet Ring
+        //scroll down 13 more
+        //click Salt
+    }
+
+    public void sellAll() throws AWTException{
+        //click Go into Town
+        //click Farmers Market
+        //click Sell All Unlocked
+        //click Yes
+        //click OK
+
+    }
+
+    public void buying() throws AWTException{//TODO
+    //Click Home
+        //Click Go To Town
+        //Click Country Store
+        //Scroll x amount
+        //Click on input box
+        //input 1100
+        //click buy button
+        //click yes
+        //click OK
+    }
+
+    public void quickClicker() throws AWTException{
+        //turns everything off
+        //clicks really fast (with variation)
+
+    }
+
+    public void crafting() throws AWTException{
+        //click Home
+        //click Go into Workshop
+        //this will be subject to change a lot.
+        //scroll down 5
+        //craft Iron Cup //every hour = full, so maybe every 10 minutes?
+        //scroll 13
+        //craft Twine
+        //craft Rope
+        //scroll down 4
+        //craft Wood Plank
+        //craft Sturdy Shield
+        //scroll down 1
+        //craft Yarn
+        //maybe we even want fishing nets? idk
+
+    }
+
+    public void fishing() throws AWTException{
+        //click go Home
+        //click Go Fishing
+        //click which place we want to fish at (switch statement for this/fishing object)
+        //while() here, removing time from each process, until 5 minutes are left
+        //Need to find the timer. so: At what rate do fish spawn?
+        //In which locations do fish spawn? Click all these locations.
+        //Click the really fast bar/really slow bar..
+        //wait X time for next fish
+        //repeat
+
+    }
+
+    public void exploring() throws AWTException{
+        //click GO Home
+        //click Explore the Area
+        //Click Whispering Creek
+        //while here, 5 minutes
+        //CLick at about 175 average clicks/sec, removing X amount of stamina each click.
+        //Once we get to x stamina, go and craft, or if it decreases below 5 minutes.
+        //explore again, until we are out of stamina.
+        //repeat
+
+
+    }
+
+    public void runStart() throws AWTException{
         //Run/Timer methods here.
+        //Logic- We want fishing, farming, crafting to all run at the same time.
+        /*
+        Farming is definitely first. So, we take the time left of the crop. let's say 9 hours. We subtract
+        by the amount that we used with randomization. Maybe add 1 second.
+        If it's greater than 5 minutes, we will run Crafting.
+        Subtract once after all crafting processes have finished.
+        If it's still greater than 5 minutes, we will run Exploring.
+        Subtract once, every time we run Exploring. (one click). We do some math with the stamina here, and the fact
+        that we need to budget at least 5 minutes to craft the stuff we explored for, as well as eat all apples.
+        OK, finally, we go to fishing, and use up the rest of our time there, until we're about 5 minutes off. Then, we wait
+        for Farming to continue. Loop this entire thing.
+         */
+
+            //check for each method.
+            //if farmingTrue; we base around the loop of cropTimer. TimerTask farming each 18 minutes, for example.
+            //if CraftingTrue; and not farmingTrue; we base around the loop of each hour. TimerTask Crafting each hour, for example.
+            //After both farming/Crafting has been satisfied, we timerTask Exploring for X amount of times based on how much time we have left.
+            //Fishing, too.
+            //Have to implement timerTask.
+            //Different things: if ONLY farmTrue, ONLY exploring, ONLY fishing, ONLY crafting.
+
+        //THus, there are 3 possibilities. 1: Farming. 2: Crafting, no farming. 3: none of them.
+        //1's timer will be based off of farming. 2's timer would be based off of crafting (1 hour). 3's timer would be based off of expl/fishing.
+
+        if(farmTrue){
+            while(infiniteRun) {
+                while (timeLeft > 0) {
+                    //for each step- subtract timeLeft.
+                    //go to farm
+                    //farming
+                    //if its mushrooms we craft it up
+                    // if crafting we craft it up
+                    //if exploring we run stam dry until timeLeft = 5 minutes or stam <=0
+                    //craft up exploring, save time for this
+                    //if exploring is false we will then go fishing for remainder of the time
+                    //loop all
+
+                }
+                timeLeft = 0;
+                timeLeft += thisCrop.getCropTime();//adds the time again so we can loop.
+
+            }
+
+        }
+        else if(craftTrue){
+            while(infiniteRun) {
+                while (timeLeft > 0) {
+                    //for each step- subtract timeLeft.
+                    // if crafting we craft it up
+                    //if exploring we run stam dry until timeLeft = 5 minutes or stam <=0
+                    //if exploring is false we will then go fishing for remainder of the time
+                    //loop all
+
+                }
+                timeLeft = 0;
+                timeLeft += 60 * 60 * 1000;//adds the time again so we can loop.
+
+            }
+
+        }
+        else if(clickerTrue){
+            //loop check if exploring is true
+            //if its false then we just run fishing
+            //do this forever
+        }
+        else{//only expl/fishing
+
+        }
+
 
     }
 
 
     public void init() {
+
         JFrame frame = new JFrame("framer");
         try {
             frame.setContentPane(new Framer().MainPanel);
@@ -416,7 +651,9 @@ public class Framer {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-
+        //TODO: add new key binding to close the frame...
+        //TODO: Closing this frame out of focus is going to be annoying.
+        //TODO: the best solution is just to add a button.
         // myList.setModel(data);
 
 
