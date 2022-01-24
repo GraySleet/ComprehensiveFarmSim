@@ -594,7 +594,19 @@ public class Framer {
         if(farmTrue){
             while(infiniteRun) {
                 while (timeLeft > 0) {
-                    //for each step- subtract timeLeft.
+                    //for each step- subtract timeLeft. we want every 10 minutes? for farming. So,
+                    /*
+                    if we start at t = 60 minutes. When t = 0, we run Crafting.
+                    Let's say Farming takes up... 20 minutes.
+                    if we start long millis
+
+                    long start = System.currentTimeMillis();
+// some time passes
+long end = System.currentTimeMillis();
+long elapsedTime = end - start;
+                    end-start; so we mod 60 and find the number we modded. If it's greater than craftCount(which counts how many times we ran Crafting
+                    then we will run crafting again. For example.
+                     */
                     //go to farm
                     //farming
                     //if its mushrooms we craft it up
