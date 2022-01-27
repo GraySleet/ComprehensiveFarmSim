@@ -339,12 +339,6 @@ public class Framer {
 
 
 
-
-
-
-
-
-
     public Framer() throws Exception {
         infoText.setEditable(false);
         requestText.setEditable(false);
