@@ -6,7 +6,7 @@ import java.awt.event.*;
 
 import static java.lang.Integer.parseInt;
 
-public class Framer {
+class Framer {
     private JPanel MainPanel;
     private JTextArea infoText;
     private JTextArea helpText;
@@ -29,28 +29,21 @@ public class Framer {
 
     private boolean farmTrue = false;//Farming, yes or no
     private boolean buyTrue = false;//Buying, yes or no
-    private boolean exploringTrue = false;//Exploring, yes or no
+
     private boolean fishTrue = false;//Fishing, yes or no
     private boolean craftTrue = false;//Crafting, yes or no
-    private boolean craftExploringTrue = false;//Craft after exploring, yes or no
-    private boolean clickerTrue = false;
 
     private long timeLeft = 0;//How much time we have left until the next farming cycle starts.
     private long runningTimer;//Time each of the methods takes up.
     //Probably will take a tiny bit of millseconds more. So, I'll actually add 1 second to every process and 10 ms to Exploring.
     //we will have lots of nested whiles. its ok, because we aren't trying to search for something.
 
-    private String whattoCraft; //The string of what we craft , we will make a default class.
 
     private int fishingArea = 0;//Which fishing area we choose
-    private int fishCount = 0; //how much fish we want to fish
-    private int minnowCount = 0;//How many minnows we have
-    private int gummyCount = 0;//How many gummies we have
-    //dont need wormcount, can just buy at the beginning...
+
 
     private int currSeeds = 0; //How many seeds we have (when we hit 0, we have to start buying!)
-
-    private double stamConsumptionCount = 0;//how much stamina we are allowed to consume
+    private boolean mushroomTrue = false;
 
     DefaultListModel<String> data;//holds the list for our data
     private boolean cancelConcat = false;//If we cancel concatenation on our switch statement
@@ -82,40 +75,26 @@ public class Framer {
             totalCode = commandCode + response;
         }
         switch (totalCode) {
-            case"start1":
+            case "start1":
                 acceptingButton = false;
                 acceptingList = false;
                 requestText.append("\nActivate Farming? y/n");
                 currDataCode = "11";
                 makeKey();
                 break;
-            case"start2":
+            case "start3":
                 acceptingButton = false;
                 acceptingList = false;
                 requestText.append("\nActivate Fishing? y/n");
                 currDataCode = "31";
                 makeKey();
                 break;
-            case"start3":
-                acceptingButton = false;
-                acceptingList = false;
-                requestText.append("\nActivate Exploring? y/n");
-                currDataCode = "21";
-                makeKey();
-            case"start4":
+            case "start4":
                 acceptingButton = false;
                 acceptingList = false;
                 requestText.append("\nActivate Crafting? y/n");
                 currDataCode = "41";
                 makeKey();
-                break;
-            case"start5":
-                acceptingButton = false;
-                acceptingList = false;
-                requestText.append("\nActivate quickClicker? y/n, NOTE, quickClicker can only run by itself");
-                currDataCode = "51";
-                makeKey();
-
                 break;
             case "11y"://11 yes
                 infoText.append("\nFarming Activated,");
@@ -125,7 +104,7 @@ public class Framer {
                 //Should automatically invoke keyListener.
                 break;
             case "11n"://11 no
-                infoText.append("Farming Deactivated");
+                infoText.append("\nFarming Deactivated");
                 acceptingList = true;
                 acceptingButton = true;
                 farmTrue = false;
@@ -177,6 +156,9 @@ public class Framer {
                 second = new Point(1502, 923);
                 cropTime = 18 * 60 * 1000;
                 scrollAmount = 13;
+
+                mushroomTrue = true;
+
                 thisCrop = new myCrop(first, second, scrollAmount, cropTime);
                 infoText.append("\ncurrCrop is mushroom");
                 requestText.append("\nWould you like to activate Buying? y/n");
@@ -203,7 +185,7 @@ public class Framer {
                 break;
             case "13n"://no to buying
                 buyTrue = false;
-                infoText.append("Buying Deactivated");
+                infoText.append("\nBuying Deactivated");
                 acceptingList = true;
                 acceptingButton = true;
 
@@ -216,60 +198,21 @@ public class Framer {
                 acceptingButton = true;
                 cancelConcat = false;
                 break;
-            case "21y"://yes to exploring
-                infoText.append("\nExploring Activated");
-                exploringTrue = true;
-                requestText.append("\nHow much stam do you want to use?");
-                currDataCode = "22";//Command 2 question 1
-                cancelConcat = true;
-                break;
-            case "21n"://no to exploring
-                infoText.append("Exploring Deactivated");
-                acceptingList = true;
-                acceptingButton = true;
-                exploringTrue = false;
-                break;
-            case "22":
-                stamConsumptionCount = Integer.parseInt(response);
-                requestText.append("\nExploring Configuration Complete");
-                infoText.append("\n Stam usage amount is " + stamConsumptionCount);
-                acceptingList = true;
-                acceptingButton = true;
-                cancelConcat = false;
-                break;
             case "31y":
                 infoText.append("\nFishing Activated");
                 fishTrue = true;
-                requestText.append("\nHow many Minnows do you have?");
-                currDataCode = "32";//Command 2 question 1
+                requestText.append("\nWhere do you want to fish?");//TODO: Switch statement for fishing area
+                currDataCode = "32";
                 cancelConcat = true;
                 break;
+
             case "31n":
-                infoText.append("Fishing Deactivated");
+                infoText.append("\nFishing Deactivated");
                 acceptingList = true;
                 acceptingButton = true;
                 fishTrue = false;
                 break;
             case "32":
-                minnowCount = Integer.parseInt(response);
-                requestText.append("\nHow many gummies do you have?");
-                infoText.append("\n Minnow amount is" + minnowCount);
-                currDataCode = "33";
-                //dont need to cancelConcat
-                break;
-            case "33":
-                gummyCount = Integer.parseInt(response);
-                infoText.append("\n Gummy amount is" + gummyCount);
-                requestText.append("\nHow much do you want to fish?");
-                currDataCode = "34";
-                break;
-            case "34":
-                fishCount = Integer.parseInt(response);
-                infoText.append("\n Fish amount is" + fishCount);
-                requestText.append("\nWhere do you want to fish? ");//TODO: Switch statement for fishing area
-                currDataCode = "35";
-                break;
-            case "35":
                 fishingArea = Integer.parseInt(response);
                 infoText.append("\n Fishing area is" + fishingArea);//TODO: Implement from case 34
                 requestText.append("\nFishing Configuration Complete");
@@ -280,8 +223,7 @@ public class Framer {
             case "41y":
                 craftTrue = true;
                 infoText.append("\nCrafting Activated");
-                requestText.append("You will craft every hour, be sure to change the items when you dont want them anymore.");
-                infoText.append("Current items crafting: Iron Cup, Twine, Rope, Yarn, Wood Plank, Sturdy Shield");
+                requestText.append("\nYou will craft every hour, be sure to change the items when you dont want them anymore.");
                 requestText.append("\nCrafting Configuration Complete");
                 acceptingList = true;
                 acceptingButton = true;
@@ -293,12 +235,15 @@ public class Framer {
                 acceptingList = true;
                 acceptingButton = true;
                 break;
-            case "51"://QuickClicker... TODO
-                break;
             case "61y"://This will be the run questions.
                 infoText.append("\n Run has been accepted.");
                 if (farmTrue) {
                     requestText.append("\nSince you've selected farming. How much time do you have left on your crop?");
+                }//TODO
+                try {
+                    runStart();
+                } catch (AWTException e) {
+                    e.printStackTrace();
                 }
                 cancelConcat = true;
                 break;
@@ -338,67 +283,70 @@ public class Framer {
 //TODO: CraftingLocation method needs to be created.
 
 
+    public Framer(boolean runFirst) {
 
-    public Framer() throws Exception {
-        infoText.setEditable(false);
-        requestText.setEditable(false);
-        helpText.setEditable(false);
+        if (runFirst == true) {
 
-        helpText.append("Information: Press (`) to stop the program.");
+            infoText.setEditable(false);
+            requestText.setEditable(false);
+            helpText.setEditable(false);
+
+            helpText.append("Information: Press (`) to stop the program.");
 
 
-        myList.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // super.mouseClicked(e);
-                if (e.getClickCount() == 2 && acceptingList) {
-                    int selectedItem = myList.getSelectedIndex(); //Gets our index of what we clicked on the list
-                    switch (selectedItem) {
-                        case 0:
-                            //farming
-                            logic("","start1");
-                            break;
-                        case 1:
-                            //Fishing
-                            logic("","start2");
-                            break;
-                        case 2:
-                            //Exploring
-                            logic("","start3");
-                            break;
-                        case 3:
-                            //Crafting
-                            logic("","start4");
-                            break;
-                        case 4:
-                            logic("","start5");
-                            //QuickClicker
-                            break;
+            myList.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    // super.mouseClicked(e);
+                    if (e.getClickCount() == 2 && acceptingList) {
+                        int selectedItem = myList.getSelectedIndex(); //Gets our index of what we clicked on the list
+                        switch (selectedItem) {
+                            case 0:
+                                //farming
+                                logic("", "start1");
+                                break;
+                            case 1:
+                                //Fishing
+                                logic("", "start3");
+                                break;
+                            case 2:
+                                break;
+                            case 3:
+                                //Crafting
+                                logic("", "start4");
+                                break;
+                            case 4:
+                                logic("", "start5");
+                                //QuickClicker
+                                break;
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        RunButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (acceptingButton) {
-                    requestText.append("\nDo you want to start the program? y/n");
-                    currDataCode = "61";
-                    acceptingButton = false;
-                    acceptingList = false;
-                    //runStart();
+            RunButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (acceptingButton) {
+                        requestText.append("\nDo you want to start the program? y/n");
+                        currDataCode = "61";
+                        acceptingButton = false;
+                        acceptingList = false;
+                        //runStart();
+                    }
                 }
-            }
-        });
+            });
 
 
-        closeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
+            closeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    System.exit(0);
+                }
+            });
+        }
+
+
     }//end constructor]
 
 
@@ -410,7 +358,8 @@ public class Framer {
         int myY;
 
         //Click Home
-
+        //0,170 to 215,189
+        //227,289 to 1510, 327
         //Click My Farm
 
         //Harvest All Crops. (259,205) --> (876,237)
@@ -465,110 +414,32 @@ public class Framer {
         //For now, we will just sweep click... this will happen once.
 
         Robot myRobot = new Robot();
-        double myRandom = Math.random() * 1000;
-        myRobot.delay(500 + (int) myRandom);
+
 
         //sweep clicks. We don't need a "random" here, because the system can't detect unpressed clicks.
-        int myX;
-        int myY;
 
-        myRandom = Math.random();
-        myX = (int) (725 + (770 - 725) * myRandom);
-        myY = (int) (303 + (346 - 303) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        for (int i = 740; i < 1100; i += 90) {
+            for (int j = 300; j < 510; j += 70) {
+                myRobot.mouseMove(i, j);
+                myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 
-        myRandom = Math.random();
-        myX = (int) (822 + (860 - 822) * myRandom);
-        myY = (int) (308 + (341 - 308) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 
-        myRandom = Math.random();
-        myX = (int) (923 + (963 - 923) * myRandom);
-        myY = (int) (303 + (339 - 303) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (1023 + (1065 - 1023) * myRandom);
-        myY = (int) (309 + (348 - 309) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (727 + (770 - 727) * myRandom);
-        myY = (int) (378 + (420 - 378) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (822 + (858 - 822) * myRandom);
-        myY = (int) (382 + (415 - 382) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (918 + (960 - 918) * myRandom);
-        myY = (int) (382 + (411 - 382) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (1019 + (1065 - 1019) * myRandom);
-        myY = (int) (384 + (415 - 384) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (723 + (760 - 723) * myRandom);
-        myY = (int) (456 + (492 - 456) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (823 + (861 - 823) * myRandom);
-        myY = (int) (455 + (493 - 455) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (922 + (963 - 922) * myRandom);
-        myY = (int) (456 + (492 - 456) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        myRandom = Math.random();
-        myX = (int) (1027 + (1070 - 1027) * myRandom);
-        myY = (int) (455 + (492 - 455) * myRandom);
-        myRobot.mouseMove(myX, myY);
-        myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-        myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-
-        //ok, sweep is complete. Now, we will click.
-        int x = 3000;
-        while (x > 0) {//TODO: Let's say, 3 seconds. Will click in the same general area every 100 ms.
-            myRandom = Math.random();
-            myX = (int) (1057 + (1088 - 1057) * myRandom);
-            myY = (int) (871 + (904 - 871) * myRandom);
-            myRobot.mouseMove(myX, myY);
-            myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-            myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-            myRobot.delay(90);//counteract system time
-            x -= 100;
+            }
 
         }
+
+        //ok, sweep is complete. Now, we will click.
+        myRobot.delay(300);
+        for (int i = 825; i < 1100; i += 12.5) {
+            myRobot.mouseMove(i, 905);
+            myRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+            myRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+
+        }
+
+        myRobot.delay(1850);
+
         //hopefully we caught a fish... Regardless, we will loop this over and over.
 
     }
@@ -580,20 +451,12 @@ public class Framer {
         //click My Workshop
         //Scroll 10 times to Mushrooms
         //Click Craft on mushroom button
-
+        //0,292 to 220,312
+        //scroll down 13 times
+        //1401,899 to 1500,926
 
     }
 
-    public void exploringCrafting() throws AWTException {//might need Highland Hills later on.
-        //click Home
-        //click My Workshop
-        //click Fancy Drum
-        //click Garnet
-        //scroll down 1
-        //click Garnet Ring
-        //scroll down 13 more
-        //click Salt
-    }
 
     public void sellAll() throws AWTException {
         //click Go into Town
@@ -606,19 +469,28 @@ public class Framer {
 
     public void buying() throws AWTException {//TODO
         //Click Home
+        //0,154 to 219,290
         //Click Go To Town
+        //231, 467 to 1508, 503
         //Click Country Store
+        //232,284 to 1512, 327
         //Scroll x amount
         //Click on input box
-        //input 1100
+        //input 1100, this is important, so...
+
+        //Mushroom input...
+
+
+
+
+
+
         //click buy button
         //click yes
         //click OK
-    }
 
-    public void quickClicker() throws AWTException {
-        //turns everything off
-        //clicks really fast (with variation)
+
+
 
     }
 
@@ -647,24 +519,14 @@ public class Framer {
 
     }
 
-    public void enterExploring() throws AWTException {
-        //click GO Home
-        //click Explore the Area
-        //Click Whispering Creek
-
-    }
-
-    public void exploring() throws AWTException {
-        //while here, 5 minutes
-        //CLick at about 175 average clicks/sec, removing X amount of stamina each click.
-        //Once we get to x stamina, go and craft, or if it decreases below 5 minutes.
-        //explore again, until we are out of stamina.
-        //repeat
-
-    }
-
 
     public void runStart() throws AWTException {
+        try {
+            Thread.sleep(3000);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (farmTrue) {
             while (infiniteRun) {
                 if (timeLeft > 0) {
@@ -677,37 +539,28 @@ public class Framer {
                 farming();
                 timeLeft = 0;
                 timeLeft += thisCrop.getCropTime();
-                if (exploringTrue && stamConsumptionCount > 100) {
-                    enterExploring();
-                } else if (fishTrue) {
+                if (fishTrue) {
                     enterFishing();
                 }
                 while (timeLeft > 0) {
-                    if (exploringTrue && stamConsumptionCount > 100) {//TODO: Subtract numbers from crafting.
-                        long start = System.currentTimeMillis();
-                        exploring();
-                        timeLeft -= (System.currentTimeMillis() - start);
-
-                    } else if (fishTrue) {//want this to run in 10 minute increments
+                    if (fishTrue) {//want this to run in 10 minute increments
                         long start = System.currentTimeMillis();
                         fishing();
                         timeLeft -= (System.currentTimeMillis() - start);
                     }
 
-                    if ((int) (System.currentTimeMillis() / 600000) > amountCrafted && craftTrue) {//TODO: 10  minutes vs 1 hour.
+                    if ((int) (System.currentTimeMillis() / 100000) > amountCrafted && craftTrue) {//TODO: 10  minutes vs 1 hour.
                         //TODO: ask if we want 10 mins or 1 hour
                         long start = System.currentTimeMillis();
                         amountCrafted++;
                         crafting();
                         sellAll();
-                        if (exploringTrue && stamConsumptionCount > 100) {
-                            enterExploring();
-                        } else if (fishTrue) {
+                        if (fishTrue) {
                             enterFishing();
                         }
                         timeLeft -= (System.currentTimeMillis() - start);
                     }
-                    if (!exploringTrue && !fishTrue) {//if neither exploring or fishing is true
+                    if (!fishTrue) {//if neither exploring or fishing is true
                         try {
                             Thread.sleep(timeLeft);
                             timeLeft = 0;
@@ -726,19 +579,12 @@ public class Framer {
                 crafting();
                 long start = System.currentTimeMillis();
                 sellAll();
-                if (exploringTrue && stamConsumptionCount > 100) {
-                    enterExploring();
-                } else if (fishTrue) {
+                if (fishTrue) {
                     enterFishing();
                 }
                 timeLeft -= (System.currentTimeMillis() - start);
                 while (timeLeft > 0) {
-                    if (exploringTrue && stamConsumptionCount > 100) {//TODO: Subtract numbers from crafting. Across the board.
-                        start = System.currentTimeMillis();
-                        exploring();
-                        timeLeft -= (System.currentTimeMillis() - start);
-
-                    } else if (fishTrue) {//want this to run in 10 minute increments
+                    if (fishTrue) {//want this to run in 10 minute increments
                         start = System.currentTimeMillis();
                         fishing();
                         timeLeft -= (System.currentTimeMillis() - start);
@@ -757,29 +603,38 @@ public class Framer {
 
             }
 
-        } else if (clickerTrue) {
-            quickClicker();
-
-        } else if (exploringTrue) {//only expl/fishing perhaps
-            enterExploring();
-
-            while (stamConsumptionCount > 100) {
-                exploring();
-            }
-
-            if (fishTrue) {
-                enterFishing();
-                while (infiniteRun) {
-                    fishing();
-                }
-
-            }
-            infoText.append("\n Process Ended.");
-
         } else if (fishTrue) {//only fishing
-            enterFishing();
-            while (infiniteRun) {
-                fishing();
+
+            try {
+                Robot myRobot = new Robot();
+                enterFishing();
+                int twentyTimes = 0;
+                while (infiniteRun) {
+
+                    twentyTimes++;
+                    if (twentyTimes % 20 == 0) {
+                        int x = (int) (1000 * Math.random());
+                        myRobot.delay(x);
+                    }
+                    if (twentyTimes % 1300 == 0){
+                        //buy more worms...
+                    //home
+                        //go to town
+                        //country store
+                        //20 times scroll
+                        //click
+                        //click yes
+                        //click OK
+                        //TODO: Error OK is 848,605 to 1073, 629
+
+                    }
+                    fishing();
+
+                }
+            }
+            catch(AWTException e){
+                e.printStackTrace();
+
             }
 
 
@@ -794,7 +649,7 @@ public class Framer {
 
         JFrame frame = new JFrame("framer");
         try {
-            frame.setContentPane(new Framer().MainPanel);
+            frame.setContentPane(new Framer(true).MainPanel);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -818,17 +673,15 @@ public class Framer {
 
         data.add(0, "Farming");
         data.add(1, "Fishing");
-        data.add(2, "Exploring");
+        data.add(2, "Blank");
         data.add(3, "Crafting");
-        data.add(4, "QuickClicker");
-        data.add(5, "MouseLocation");
 
         myList = new JList<>(data);//a
     }
 
     public static void main(String[] args) {
         try {
-            Framer f = new Framer();
+            Framer f = new Framer(true);
             f.init();
         } catch (Exception e) {
             e.printStackTrace();
